@@ -1,0 +1,27 @@
+version: "3.4"
+
+services:
+  dbstorage:
+    image: mysql:5.7.19
+    environment:
+      - MYSQL_ROOT_PASSWORD=qwerty
+    volumes:
+      - ./schemas/mysql:/docker-entrypoint-initdb.d
+      - ./schemas/mysql/cnf:/etc/mysql/conf.d
+      - ./mysql.log:/var/log/mysql/mysql.log
+
+  acceptance:
+    image: golang:1.10-alpine3.8
+    environment:
+      - STOCK_MYSQL_HOST=dbstorage
+      - STOCK_MYSQL_PORT=3306
+      - STOCK_MYSQL_USER=root
+      - STOCK_MYSQL_DATABASE_NAME=stock
+      - STOCK_MYSQL_PASSWORD=qwerty
+    volumes:
+      - ./:/go/src/github.com/imega/avro-learning
+    working_dir: "/go/src/github.com/imega/avro-learning"
+    command: >
+      /bin/sh -c "
+        go test -v github.com/imega/avro-learning/acceptance
+      "
